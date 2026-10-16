@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080d18">
+    <title>Arcane Stars</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #080d18;
+            color: #f4f7ff;
+            font-family: Arial, sans-serif;
+            padding: 24px 16px 100px;
+            min-height: 100vh;
+        }
+
+        .app { max-width: 440px; margin: 0 auto; }
+
+        .header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .logo {
+            width: 48px; height: 48px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #42d9ff, #2874ff);
+            color: #07101e;
+            display: grid; place-items: center;
+            font-size: 24px; font-weight: 900;
+        }
+
+        .brand { font-size: 19px; font-weight: 800; letter-spacing: 1px; }
+        .subtitle { color: #8e9bb3; font-size: 12px; margin-top: 5px; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .tabbar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #0b1322;
+            border-top: 1px solid #1c273a;
+            display: flex;
+            padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+            z-index: 100;
+            max-width: 440px;
+            margin: 0 auto;
+        }
+
+        .tab {
+            flex: 1;
+            background: none;
+            border: 0;
+            color: #5f6f88;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 8px 0;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: 0.15s;
+        }
+
+        .tab.active { color: #42d9ff; }
+        .tab-icon { font-size: 20px; }
+
+        .segmented {
+            display: flex;
+            gap: 8px;
+            background: #111a2b;
+            border: 1px solid #25334b;
+            border-radius: 16px;
+            padding: 6px;
+            margin-bottom: 20px;
+        }
+
+        .segmented button {
+            flex: 1;
+            border: 0;
+            background: transparent;
+            color: #8e9bb3;
+            padding: 12px 10px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .segmented button.active {
+            background: linear-gradient(100deg, #42d9ff, #3885ff);
+            color: #07101e;
+        }
+
+        .recipient {
+            background: #111a2b;
+            border: 1px solid #25334b;
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 20px;
+        }
+
+        .recipient-label {
+            color: #8e9bb3;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .recipient-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .recipient-options button {
+            flex: 1;
+            border: 1px solid #2a3a55;
+            background: #0d1524;
+            color: #8e9bb3;
+            padding: 11px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .recipient-options button.active {
+            border-color: #42d9ff;
+            background: #132a3d;
+            color: #42d9ff;
+        }
+
+        .recipient-input-wrap {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .recipient-input-wrap.visible { display: block; }
+
+        .recipient-input-wrap input {
+            padding-left: 36px;
+        }
+
+        .input-with-prefix {
+            position: relative;
+        }
+
+        .input-prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #42d9ff;
+            font-size: 16px;
+            font-weight: 800;
+            pointer-events: none;
+        }
+
+        .profile {
+            background: linear-gradient(135deg, #142944, #101a30);
+            border: 1px solid #263d5c;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .avatar {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: #1b2940;
+            display: grid; place-items: center;
+            font-size: 22px; font-weight: 800;
+            color: #42d9ff;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .profile-info { flex: 1; min-width: 0; }
+
+        .profile-name {
+            font-size: 16px; font-weight: 800;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .profile-username { color: #8e9bb3; font-size: 12px; margin-top: 3px; }
+
+        .referral {
+            background: #111a2b;
+            border: 1px solid #25334b;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .referral-title { font-size: 14px; font-weight: 800; margin-bottom: 10px; }
+        .referral-row { display: flex; gap: 8px; }
+
+        .referral-input {
+            flex: 1;
+            padding: 11px 12px;
+            border-radius: 10px;
+            border: 1px solid #2a3a55;
+            background: #080d18;
+            color: #aab8ce;
+            font-size: 12px;
+            outline: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 0;
+            background: #1b2940;
+            color: #42d9ff;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .copy-btn:active { transform: scale(0.97); }
+
+        .referral-stats {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .referral-stat {
+            flex: 1;
+            background: #0d1524;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .referral-stat-value {
+            font-size: 18px;
+            font-weight: 900;
+            color: #42d9ff;
+        }
+
+        .referral-stat-label {
+            color: #8e9bb3;
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .orders { margin-bottom: 24px; }
+
+        .order {
+            background: #111a2b;
+            border: 1px solid #25334b;
+            border-radius: 14px;
+            padding: 13px 15px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .order-left { color: #aab8ce; }
+        .order-amount { color: #42d9ff; font-weight: 700; }
+        .order-date { color: #5f6f88; font-size: 11px; margin-top: 3px; }
+        .order-recipient { color: #5f6f88; font-size: 11px; margin-top: 2px; }
+
+        .empty {
+            color: #5f6f88; font-size: 13px;
+            text-align: center; padding: 20px 0;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #142944, #101a30);
+            border: 1px solid #263d5c;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .tag {
+            color: #4edcff; font-size: 11px; font-weight: bold;
+            letter-spacing: 2px; margin-bottom: 12px;
+        }
+
+        h1 { font-size: 29px; line-height: 1.15; margin-bottom: 12px; }
+        .hero p { color: #aab8ce; font-size: 14px; line-height: 1.5; }
+
+        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; }
+
+        .packages {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .packages.premium-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .package {
+            text-align: left; color: white;
+            background: #111a2b;
+            border: 1px solid #25334b;
+            border-radius: 18px;
+            padding: 17px 14px;
+            cursor: pointer; transition: 0.15s;
+            position: relative;
+        }
+
+        .package.selected {
+            border-color: #42d9ff;
+            background: #132a3d;
+            box-shadow: 0 0 0 1px #42d9ff inset;
+        }
+
+        .package.premium-pkg {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px;
+        }
+
+        .stars { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .stars span { color: #42d9ff; }
+        .package-price { color: #9caac1; font-size: 13px; }
+
+        .premium-badge {
+            position: absolute;
+            top: -8px; right: 12px;
+            background: linear-gradient(100deg, #42d9ff, #3885ff);
+            color: #07101e;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .premium-left { flex: 1; }
+        .premium-name { font-size: 16px; font-weight: 800; }
+        .premium-sub { color: #8e9bb3; font-size: 12px; margin-top: 3px; }
+        .premium-price-big {
+            font-size: 20px; font-weight: 900;
+            color: #42d9ff;
+            white-space: nowrap;
+        }
+
+        .custom {
+            margin-top: 24px;
+            background: #111a2b;
+            border: 1px solid #25334b;
+            border-radius: 20px;
+            padding: 18px;
+        }
+
+        label {
+            display: block; color: #aab8ce;
+            font-size: 13px; margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%; padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #2a3a55;
+            background: #080d18;
+            color: white; font-size: 16px; outline: none;
+        }
+
+        input:focus { border-color: #42d9ff; }
+        .hint { color: #7888a3; font-size: 12px; margin-top: 9px; }
+
+        .total {
+            display: flex; justify-content: space-between;
+            align-items: center; gap: 12px;
+            margin: 24px 0 16px;
+        }
+
+        .total-label { color: #aab8ce; font-size: 14px; }
+        .total-price { font-size: 27px; font-weight: 800; white-space: nowrap; }
+
+        .buy {
+            width: 100%; border: 0; border-radius: 15px;
+            padding: 17px;
+            background: linear-gradient(100deg, #42d9ff, #3885ff);
+            color: #07101e;
+            font-size: 15px; font-weight: 800; cursor: pointer;
+        }
+
+        .buy:active { transform: scale(0.99); }
+
+        .notice {
+            color: #74849e; font-size: 11px;
+            text-align: center; line-height: 1.5;
+            margin-top: 20px;
+        }
+
+        footer {
+            text-align: center; margin-top: 30px;
+            padding: 18px 0 8px;
+            border-top: 1px solid #1c273a;
+            color: #7788a3; font-size: 12px;
+        }
+
+        footer .author {
+            color: #42d9ff;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        footer .author:active { opacity: 0.7; }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 350px) {
+            h1 { font-size: 25px; }
+            .package { padding: 14px 10px; }
+            .stars { font-size: 19px; }
+        }
+    </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- ВКЛАДКА 1: МАГАЗИН -->
+    <section id="tab-shop" class="tab-content active">
+
+      <header class="header">
+        <div class="logo">A</div>
+        <div>
+          <div class="brand">Arcane Stars</div>
+          <div class="subtitle">Telegram Stars & Premium</div>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div class="tag">Arcane Stars</div>
+        <h1>Твои звёзды.<br>Твои возможности.</h1>
+        <p>Выбирай Stars или Premium — себе или в подарок.</p>
+      </section>
+
+      <div class="segmented">
+        <button type="button" class="active" data-mode="stars">⭐ Stars</button>
+        <button type="button" data-mode="premium">💎 Premium</button>
+      </div>
+
+      <div class="recipient">
+        <div class="recipient-label">Кому отправить?</div>
+        <div class="recipient-options">
+          <button type="button" class="active" data-recipient="me">Себе</button>
+          <button type="button" data-recipient="other">Другому</button>
+        </div>
+        <div class="recipient-input-wrap" id="recipientInputWrap">
+          <div class="input-with-prefix">
+            <span class="input-prefix">@</span>
+            <input type="text" id="recipientUsername" placeholder="username" autocomplete="off">
+          </div>
+          <div class="hint">Введите username получателя без @</div>
+        </div>
+      </div>
+
+      <div id="block-stars">
+        <section>
+          <div class="section-title">Выбери количество ⭐</div>
+          <div class="packages" id="packagesStars"></div>
+        </section>
+
+        <section class="custom">
+          <label for="amount">Или введи своё количество Stars</label>
+          <input id="amount" type="number" min="50" max="100000" step="1"
+                 placeholder="Например, 750" inputmode="numeric">
+          <div class="hint">Минимальный заказ — 50 Stars</div>
+        </section>
+      </div>
+
+      <div id="block-premium" class="hidden">
+        <section>
+          <div class="section-title">Выбери срок Premium 💎</div>
+          <div class="packages premium-grid" id="packagesPremium"></div>
+        </section>
+      </div>
+
+      <section>
+        <div class="total">
+          <div class="total-label">Итого к оплате</div>
+          <div class="total-price" id="total">67,50 ₽</div>
+        </div>
+        <button class="buy" id="buy">Продолжить</button>
+      </section>
+
+      <div class="notice">
+        Оплата и автоматическая выдача пока не подключены.
+      </div>
+
+      <footer>
+        Приложение создано <a class="author" href="https://t.me/havocker" target="_blank">@havocker</a>
+      </footer>
+    </section>
+
+    <!-- ВКЛАДКА 2: ПРОФИЛЬ -->
+    <section id="tab-profile" class="tab-content">
+
+      <header class="header">
+        <div class="logo">A</div>
+        <div>
+          <div class="brand">Профиль</div>
+          <div class="subtitle">Реферальная программа</div>
+        </div>
+      </header>
+
+      <section class="profile">
+        <div class="avatar" id="avatar">?</div>
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">Гость</div>
+          <div class="profile-username" id="profileUsername">@unknown</div>
+        </div>
+      </section>
+
+      <section class="referral">
+        <div class="referral-title">🎁 Приглашай друзей — получай 1% с их покупок</div>
+        <div class="referral-row">
+          <input class="referral-input" id="refLink" readonly value="Загрузка...">
+          <button class="copy-btn" id="copyRef">Копировать</button>
+        </div>
+        <div class="referral-stats">
+          <div class="referral-stat">
+            <div class="referral-stat-value" id="refCount">0</div>
+            <div class="referral-stat-label">друзей</div>
+          </div>
+          <div class="referral-stat">
+            <div class="referral-stat-value" id="refEarned">0 ₽</div>
+            <div class="referral-stat-label">заработано</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="orders">
+        <div class="section-title">История заказов</div>
+        <div id="ordersList">
+          <div class="empty">Пока нет заказов</div>
+        </div>
+      </section>
+
+      <footer>
+        Приложение создано <a class="author" href="https://t.me/havocker" target="_blank">@havocker</a>
+      </footer>
+    </section>
+
+    <!-- ТАББАР -->
+    <nav class="tabbar">
+      <button class="tab active" data-tab="shop">
+        <span class="tab-icon">🛒</span>
+        Магазин
+      </button>
+      <button class="tab" data-tab="profile">
+        <span class="tab-icon">👤</span>
+        Профиль
+      </button>
+    </nav>
+
+  </main>
+
+  <script>
+    /* 1. TELEGRAM WEBAPP */
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      tg.setHeaderColor?.("#080d18");
+    }
+
+    /* Открытие ссылок внутри Telegram */
+    document.querySelectorAll(".author").forEach(link => {
+      link.addEventListener("click", (e) => {
+        const url = link.href;
+        if (tg?.openTelegramLink) {
+          e.preventDefault();
+          tg.openTelegramLink(url);
+        }
+        // если открыто в браузере — сработает обычный переход
+      });
+    });
+
+    /* 2. STORAGE */
+    const STORAGE_KEY = "arcane_user";
+
+    function loadUser() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (!u.referrals) u.referrals = [];
+        if (typeof u.ref_earned !== "number") u.ref_earned = 0;
+        return u;
+      }
+
+      const tgUser = tg?.initDataUnsafe?.user;
+      const user = {
+        id: tgUser?.id || 0,
+        first_name: tgUser?.first_name || "Гость",
+        last_name: tgUser?.last_name || "",
+        username: tgUser?.username || "unknown",
+        photo_url: tgUser?.photo_url || null,
+        total_spent: 0,
+        orders: [],
+        referral_code: tgUser?.id ? "ref" + tgUser.id : "ref0",
+        referrals: [],
+        ref_earned: 0,
+      };
+      saveUser(user);
+      return user;
+    }
+
+    function saveUser(user) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    }
+
+    let user = loadUser();
+
+    /* 3. BOTTOM TABS */
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById("tab-" + tab.dataset.tab).classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+
+    /* 4. FORMAT */
+    function formatNumber(number) {
+      return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(number);
+    }
+    function formatPrice(number) {
+      return formatNumber(number) + " ₽";
+    }
+
+    /* 5. PROFILE */
+    function renderProfile() {
+      document.getElementById("profileName").textContent =
+        (user.first_name + " " + user.last_name).trim() || "Гость";
+      document.getElementById("profileUsername").textContent = "@" + user.username;
+
+      const avatarEl = document.getElementById("avatar");
+      if (user.photo_url) {
+        avatarEl.innerHTML = `<img src="${user.photo_url}" alt="">`;
+      } else {
+        avatarEl.textContent = (user.first_name[0] || "?").toUpperCase();
+      }
+    }
+
+    /* 6. REFERRAL */
+    function renderReferral() {
+      const botUsername = "ArcaneStarsBot"; // ← замените на username вашего бота
+      const link = `https://t.me/${botUsername}?start=${user.referral_code}`;
+      document.getElementById("refLink").value = link;
+
+      document.getElementById("refCount").textContent = user.referrals.length;
+      document.getElementById("refEarned").textContent = formatPrice(user.ref_earned);
+    }
+
+    document.getElementById("copyRef").addEventListener("click", async () => {
+      const input = document.getElementById("refLink");
+      try {
+        await navigator.clipboard.writeText(input.value);
+        if (tg?.showAlert) tg.showAlert("Ссылка скопирована!");
+        else alert("Ссылка скопирована!");
+      } catch {
+        input.select();
+        document.execCommand("copy");
+      }
+    });
+
+    /* 7. ORDERS */
+    function renderOrders() {
+      const list = document.getElementById("ordersList");
+      if (!user.orders.length) {
+        list.innerHTML = `<div class="empty">Пока нет заказов</div>`;
+        return;
+      }
+      list.innerHTML = user.orders.slice().reverse().slice(0, 10).map(o => `
+        <div class="order">
+          <div class="order-left">
+            <div>${o.title}</div>
+            ${o.recipient ? `<div class="order-recipient">→ @${o.recipient}</div>` : ""}
+            <div class="order-date">${o.date}</div>
+          </div>
+          <div class="order-amount">${formatPrice(o.price)}</div>
+        </div>
+      `).join("");
+    }
+
+    /* 8. ADD ORDER */
+    function addOrder(title, priceRub, recipient) {
+      user.orders.push({
+        title: title,
+        price: priceRub,
+        recipient: recipient || null,
+        date: new Date().toLocaleString("ru-RU"),
+      });
+      user.total_spent += priceRub;
+
+      saveUser(user);
+      renderOrders();
+    }
+
+    /* 9. SHOP */
+    const RATE = 1.35;
+    const MIN_AMOUNT = 50;
+    const MAX_AMOUNT = 10000000;
+
+    const STAR_PACKAGES = [50, 100, 250, 500, 1000, 2500];
+    const PREMIUM_PACKAGES = [
+      { months: 3,  price: 1100, badge: null },
+      { months: 6,  price: 1450, badge: "Выгодно" },
+      { months: 12, price: 2520, badge: "Лучшая цена" },
+    ];
+
+    let mode = "stars";
+    let recipientType = "me";
+    let selectedStars = 50;
+    let selectedPremium = null;
+
+    const packagesStarsEl = document.getElementById("packagesStars");
+    const packagesPremiumEl = document.getElementById("packagesPremium");
+    const amountInput = document.getElementById("amount");
+    const totalElement = document.getElementById("total");
+    const buyButton = document.getElementById("buy");
+
+    const blockStars = document.getElementById("block-stars");
+    const blockPremium = document.getElementById("block-premium");
+
+    const recipientWrap = document.getElementById("recipientInputWrap");
+    const recipientInput = document.getElementById("recipientUsername");
+
+    /* Переключатель Stars / Premium */
+    document.querySelectorAll(".segmented button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".segmented button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        mode = btn.dataset.mode;
+
+        if (mode === "stars") {
+          blockStars.classList.remove("hidden");
+          blockPremium.classList.add("hidden");
+        } else {
+          blockStars.classList.add("hidden");
+          blockPremium.classList.remove("hidden");
+        }
+        updateTotal();
+      });
+    });
+
+    /* Переключатель Себе / Другому */
+    document.querySelectorAll(".recipient-options button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".recipient-options button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        recipientType = btn.dataset.recipient;
+
+        if (recipientType === "other") {
+          recipientWrap.classList.add("visible");
+          recipientInput.focus();
+        } else {
+          recipientWrap.classList.remove("visible");
+          recipientInput.value = "";
+        }
+      });
+    });
+
+    function renderStarPackages() {
+      packagesStarsEl.innerHTML = "";
+      STAR_PACKAGES.forEach(amount => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "package";
+        button.dataset.amount = amount;
+        button.innerHTML = `
+          <div class="stars"><span>⭐</span> ${formatNumber(amount)}</div>
+          <div class="package-price">${formatPrice(amount * RATE)}</div>
+        `;
+        button.addEventListener("click", () => {
+          selectedStars = amount;
+          amountInput.value = "";
+          updateTotal();
+        });
+        packagesStarsEl.appendChild(button);
+      });
+    }
+
+    function renderPremiumPackages() {
+      packagesPremiumEl.innerHTML = "";
+      PREMIUM_PACKAGES.forEach(pkg => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "package premium-pkg";
+        button.dataset.months = pkg.months;
+
+        const badge = pkg.badge ? `<div class="premium-badge">${pkg.badge}</div>` : "";
+
+        button.innerHTML = `
+          ${badge}
+          <div class="premium-left">
+            <div class="premium-name">💎 ${pkg.months} мес.</div>
+            <div class="premium-sub">Telegram Premium</div>
+          </div>
+          <div class="premium-price-big">${formatPrice(pkg.price)}</div>
+        `;
+
+        button.addEventListener("click", () => {
+          selectedPremium = pkg;
+          updateTotal();
+        });
+
+        packagesPremiumEl.appendChild(button);
+      });
+    }
+
+    function getAmount() {
+      if (mode === "stars") {
+        if (amountInput.value.trim() !== "") return Number(amountInput.value);
+        return selectedStars;
+      }
+      return null;
+    }
+
+    function updateTotal() {
+      if (mode === "stars") {
+        const amount = getAmount();
+
+        document.querySelectorAll("#packagesStars .package").forEach((button) => {
+          button.classList.toggle(
+            "selected",
+            amountInput.value.trim() === "" &&
+            Number(button.dataset.amount) === selectedStars
+          );
+        });
+        document.querySelectorAll("#packagesPremium .package").forEach(b => b.classList.remove("selected"));
+
+        if (
+          !Number.isFinite(amount) ||
+          amount < MIN_AMOUNT ||
+          amount > MAX_AMOUNT ||
+          !Number.isInteger(amount)
+        ) {
+          totalElement.textContent = "—";
+          return;
+        }
+        totalElement.textContent = formatPrice(amount * RATE);
+
+      } else {
+        document.querySelectorAll("#packagesPremium .package").forEach((button) => {
+          button.classList.toggle(
+            "selected",
+            selectedPremium && Number(button.dataset.months) === selectedPremium.months
+          );
+        });
+        document.querySelectorAll("#packagesStars .package").forEach(b => b.classList.remove("selected"));
+
+        if (!selectedPremium) {
+          totalElement.textContent = "—";
+          return;
+        }
+        totalElement.textContent = formatPrice(selectedPremium.price);
+      }
+    }
+
+    amountInput.addEventListener("input", updateTotal);
+
+    buyButton.addEventListener("click", () => {
+      let recipient = null;
+      if (recipientType === "other") {
+        recipient = recipientInput.value.trim().replace(/^@/, "");
+        if (!recipient || !/^[a-zA-Z0-9_]{5,32}$/.test(recipient)) {
+          const msg = "Введите корректный username получателя (5-32 символа, латиница, цифры, _).";
+          if (tg?.showAlert) tg.showAlert(msg); else alert(msg);
+          return;
+        }
+      }
+
+      if (mode === "stars") {
+        const amount = getAmount();
+
+        if (
+          !Number.isFinite(amount) ||
+          !Number.isInteger(amount) ||
+          amount < MIN_AMOUNT ||
+          amount > MAX_AMOUNT
+        ) {
+          const msg = "Введи целое число от 50 до 10 000 000 Stars.";
+          if (tg?.showAlert) tg.showAlert(msg); else alert(msg);
+          return;
+        }
+
+        const priceRub = amount * RATE;
+        addOrder(`⭐ ${formatNumber(amount)} Stars`, priceRub, recipient);
+
+        const msg =
+          "Заказ: " + formatNumber(amount) + " Stars\n" +
+          (recipient ? "Получатель: @" + recipient + "\n" : "Получатель: вы\n") +
+          "Стоимость: " + formatPrice(priceRub) + "\n\n" +
+          "Оформление оплаты пока не подключено.";
+        if (tg?.showAlert) tg.showAlert(msg); else alert(msg);
+
+      } else {
+        if (!selectedPremium) {
+          const msg = "Выбери срок Premium.";
+          if (tg?.showAlert) tg.showAlert(msg); else alert(msg);
+          return;
+        }
+
+        addOrder(`💎 Premium ${selectedPremium.months} мес.`, selectedPremium.price, recipient);
+
+        const msg =
+          "Заказ: Telegram Premium " + selectedPremium.months + " мес.\n" +
+          (recipient ? "Получатель: @" + recipient + "\n" : "Получатель: вы\n") +
+          "Стоимость: " + formatPrice(selectedPremium.price) + "\n\n" +
+          "Оформление оплаты пока не подключено.";
+        if (tg?.showAlert) tg.showAlert(msg); else alert(msg);
+      }
+    });
+
+    /* 10. INIT */
+    renderStarPackages();
+    renderPremiumPackages();
+    updateTotal();
+    renderProfile();
+    renderReferral();
+    renderOrders();
+  </script>
+</body>
+</html>
