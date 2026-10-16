@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080d18">
+    <title>Arcane Stars</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #080d18;
+            color: #f4f7ff;
+            font-family: Arial, sans-serif;
+            padding: 24px 16px;
+            min-height: 100vh;
+        }
+
+        .app {
+            max-width: 440px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #42d9ff, #2874ff);
+            color: #07101e;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .brand {
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #8e9bb3;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #142944, #101a30);
+            border: 1px solid #263d5c;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+    
+        .tag {
+            color: #4edcff;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+         h1 {
+           font-size: 29px;
+           line-height: 1.15;
+           margin-bottom: 12px;
+        }
+
+        .hero p {
+            color: #aab8ce;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
+
+        .packages {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .package {
+            text-align: left;
+            color: white;
+            background: #111a2b;
+            border: 1px solid #25334b;
+            border-radius: 18px;
+            padding: 17px 14px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .package.selected {
+            border-color: #42d9ff;
+            background: #132a3d;
+            box-shadow: 0 0 0 1px #42d9ff inset;
+        }
+
+        .stars {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .stars span {
+            color: #42d9ff;
+       }
+
+        .package-price {
+            color: #9caac1;
+            font-size: 13px;
+        }
+
+        .custom {
+            margin-top: 24px;
+            background: #111a2b;
+            border: 1px solid #25334b;
+            border-radius: 20px;
+            padding: 18px;
+        }
+
+        label {
+            display: block;
+            color: #aab8ce;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #2a3a55;
+            background: #080d18;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #42d9ff;
+        }
+
+        .hint {
+            color: #7888a3;
+            font-size: 12px;
+            margin-top: 9px;
+        }
+
+        .total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0 16px;
+        }
+
+        .total-label {
+            color: #aab8ce;
+            font-size: 14px;
+        }
+
+        .total-price {
+            font-size: 27px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .buy {
+            width: 100%;
+            border: 0;
+            border-radius: 15px;
+            padding: 17px;
+            background: linear-gradient(100deg, #42d9ff, #3885ff);
+            color: #07101e;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .buy:active {
+            transform: scale(0.99);
+        }
+
+        .premium {
+            margin-top: 14px;
+            padding: 19px;
+            border: 1px solid #263d5c;
+            background: #111a2b;
+            border-radius: 18px;
+        }
+
+        .premium-title {
+            font-weight: 800;
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .premium p {
+            color: #9caac1;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .premium button {
+            width: 100%;
+            background: #1b2940;
+            color: white;
+            border: 1px solid #354967;
+            border-radius: 12px;
+            padding: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .notice {
+            color: #74849e;
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.5;
+            margin-top: 20px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 18px 0 8px;
+            border-top: 1px solid #1c273a;
+            color: #7788a3;
+            font-size: 12px;
+        }
+
+        footer span {
+            color: #42d9ff;
+        }
+
+        @media (max-width: 350px) {
+            h1 {
+              font-size: 25px;
+        }
+
+        .package {
+            padding: 14px 10px;
+        }
+
+        .stars {
+            font-size: 19px;
+        }
+        }
+    </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="logo">A</div>
+      <div>
+        <div class="brand">Arcane Stars</div>
+        <div class="subtitle">Telegram Stars & Premium</div>
+      </div>
+    </header>
+    <section class="hero">
+      <div class="tag">Arcane Stars</div>
+      <h1>Твои звёзды.<br>Твои возможности.</h1>
+      <p>Выбирай количество Telegram Stars
+        и рассчитывай стоимость заказа.</p>
+    </section>
+    <section>
+      <div class="section-title">Выбери количество ⭐</div>
+      <div class="packages" id="packages"></div>
+    </section>
+
+    <section class="custom">
+      <label for="amount">Или введи своё количество Stars</label>
+      <input
+        id="amount"
+        type="number"
+        min="50"
+        max="100000"
+        step="1"
+        placeholder="Например, 750"
+        inputmode="numeric"
+      >
+      <div class="hint">Минимальный заказ — 50 Stars</div>
+    </section>
+    <section>
+      <div class="total">
+        <div class="total-label">Итого к оплате</div>
+        <div class="total-price" id="total">67,50 ₽</div>
+      </div>
+
+      <button class="buy" id="buy">
+        Продолжить
+      </button>
+    </section>
+    <section class="premium">
+      <div class="premium-title">💎 Telegram Premium</div>
+      <p> Хочешь Premium? Информация о доступных вариантах
+        появится после подключения оформления заказов.</p>
+      <button id="premium">Подробнее о Premium</button>
+    </section>
+    <div class="notice">
+      Стоимость рассчитана по тарифу 1,35 ₽ за одну Stars.
+      <br>
+      Оплата и автоматическая выдача пока не подключены.
+    </div>
+    <footer>
+      Приложение создано <span>@havocker</span>
+    </footer>
+  </main>
+  <script>
+    const RATE = 1.35;
+    const MIN_AMOUNT = 50;
+    const MAX_AMOUNT = 10000000;
+    const packageAmounts = [50, 100, 250, 500, 1000, 2500];
+    const packagesElement = document.getElementById("packages");
+    const amountInput = document.getElementById("amount");
+    const totalElement = document.getElementById("total");
+    const buyButton = document.getElementById("buy");
+    const premiumButton = document.getElementById("premium");
+
+    let selectedAmount = 50;
+
+    function formatNumber(number) {
+      return new Intl.NumberFormat("ru-RU", {
+        maximumFractionDigits: 2
+      }).format(number);
+    }
+    function formatPrice(number) {
+      return formatNumber(number) + " ₽";
+    }
+
+    function renderPackages() {
+      packagesElement.innerHTML = "";
+
+      packageAmounts.forEach((amount) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "package";
+        button.dataset.amount = amount;
+        button.innerHTML = `
+
+          <div class="stars"><span>⭐</span> ${formatNumber(amount)}</div>
+          <div class="package-price">${formatPrice(amount * RATE)}</div>
+        `;
+
+        button.addEventListener("click", () => {
+          selectedAmount = amount;
+          amountInput.value = "";
+          updateTotal();
+        });
+
+packagesElement.appendChild(button);
+      });
+    }
+
+    function getAmount() {
+      if (amountInput.value.trim() !== "") {
+        return Number(amountInput.value);
+      }
+
+      return selectedAmount;
+    }
+
+    function updateTotal() {
+      const amount = getAmount();
+
+
+document.querySelectorAll(".package").forEach((button) => {
+        button.classList.toggle(
+          "selected",
+          amountInput.value.trim() === "" &
+          Number(button.dataset.amount) === selectedAmount
+        );
+      });
+
+      if (
+        !Number.isFinite(amount) ||
+        amount < MIN_AMOUNT ||
+        amount > MAX_AMOUNT ||
+        !Number.isInteger(amount)
+      ) {
+        totalElement.textContent = "—";
+        return;
+      }
+
+      totalElement.textContent = formatPrice(amount * RATE);
+    }
+
+    amountInput.addEventListener("input", updateTotal);
+
+    buyButton.addEventListener("click", () => {
+      const amount = getAmount();
+
+      if (
+        !Number.isFinite(amount) ||
+        !Number.isInteger(amount) ||
+        amount < MIN_AMOUNT ||
+        amount > MAX_AMOUNT
+      ) {
+        alert("Введи целое число от 50 до 10 000 000 Stars.");
+        return;
+      }
+
+      alert(
+        "Заказ: " + formatNumber(amount) + " Stars\n" +
+        "Стоимость: " + formatPrice(amount * RATE) + "\n\n" +
+        "Оформление оплаты пока не подключено."
+      );
+    });
+
+premiumButton.addEventListener("click", () => {
+      alert("Раздел Telegram Premium пока находится в разработке.");
+    });
+
+    renderPackages();
+    updateTotal();
+  </script>
+</body>
+</html>
